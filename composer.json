@@ -1,0 +1,36 @@
+{
+    "name": "fsi/admin-tree-bundle",
+    "type": "symfony-bundle",
+    "description": "FSi admin tree bundle.",
+    "keywords": ["admin", "symfony2", "bundle", "tree"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Piotr Kapera",
+            "email": "piotr.kapera@fsi.pl"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/framework-bundle" : "~2.3",
+        "fsi/admin-bundle" : "1.0.*",
+        "gedmo/doctrine-extensions": "2.3.*"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "2.0.*@dev"
+    },
+    "config": {
+        "bin-dir": "bin"
+    },
+    "autoload": {
+        "psr-0": {
+            "FSi\\Bundle\\AdminTreeBundle\\": ""
+        }
+    },
+    "target-dir" : "FSi/Bundle/AdminTreeBundle",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
