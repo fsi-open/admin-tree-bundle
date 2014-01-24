@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="fsi_tree.controller.class">FSi\Bundle\AdminTreeBundle\Controller\ReorderController</parameter>
+    </parameters>
+
+    <services>
+        <service id="fsi_tree.controller.reorder" class="%fsi_tree.controller.class%">
+            <argument type="service" id="router" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+    </services>
+</container>
