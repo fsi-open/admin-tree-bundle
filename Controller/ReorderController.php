@@ -9,11 +9,12 @@
 
 namespace FSi\Bundle\AdminTreeBundle\Controller;
 
-use FSi\Bundle\AdminBundle\Admin\Doctrine\CRUDElement;
+use FSi\Bundle\AdminBundle\Admin\CRUD\DataIndexerElement;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Router;
+use FSi\Bundle\AdminBundle\Doctrine\Admin\Element;
 
 class ReorderController
 {
@@ -31,11 +32,11 @@ class ReorderController
     }
 
     /**
-     * @param CRUDElement $element
+     * @param DataIndexerElement $element
      * @param $id
      * @return RedirectResponse
      */
-    public function moveUpAction(CRUDElement $element, $id)
+    public function moveUpAction(DataIndexerElement $element, $id)
     {
         $entity = $this->getEntity($element, $id);
 
@@ -44,19 +45,19 @@ class ReorderController
         $this->assertCorrectRepositoryType($repository);
         $repository->moveUp($entity);
 
-        $element->getObjectManager()->flush();
+        $this->flush($element, $entity);
 
         return new RedirectResponse(
-            $this->router->generate('fsi_admin_crud_list', array('element' => $element->getId()))
+            $this->router->generate($element->getRoute(), $element->getRouteParameters())
         );
     }
 
     /**
-     * @param CRUDElement $element
+     * @param DataIndexerElement $element
      * @param $id
      * @return RedirectResponse
      */
-    public function moveDownAction(CRUDElement $element, $id)
+    public function moveDownAction(DataIndexerElement $element, $id)
     {
         $entity = $this->getEntity($element, $id);
 
@@ -65,20 +66,20 @@ class ReorderController
         $this->assertCorrectRepositoryType($repository);
         $repository->moveDown($entity);
 
-        $element->getObjectManager()->flush();
+        $this->flush($element, $entity);
 
         return new RedirectResponse(
-            $this->router->generate('fsi_admin_crud_list', array('element' => $element->getId()))
+            $this->router->generate($element->getRoute(), $element->getRouteParameters())
         );
     }
 
     /**
-     * @param CRUDElement $element
+     * @param DataIndexerElement $element
      * @param int $id
      * @throws NotFoundHttpException
      * @return Object
      */
-    private function getEntity(CRUDElement $element, $id)
+    private function getEntity(DataIndexerElement $element, $id)
     {
         $entity = $element->getDataIndexer()->getData($id);
 
@@ -101,5 +102,15 @@ class ReorderController
                 sprintf("Entity must have repository class 'NestedTreeRepository'")
             );
         }
+    }
+
+    /**
+     * @param Element $element
+     * @param $entity
+     */
+    private function flush(Element $element, $entity)
+    {
+        $om = $element->getObjectManager();
+        $om->flush();
     }
 }

@@ -11,9 +11,9 @@ namespace spec\FSi\Bundle\AdminTreeBundle\Controller;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityRepository;
-use FSi\Bundle\AdminBundle\Admin\Doctrine\CRUDElement;
 use FSi\Component\DataIndexer\DoctrineDataIndexer;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
+use FSi\Bundle\AdminBundle\Doctrine\Admin\CRUDElement;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use Symfony\Component\Routing\Router;
@@ -31,6 +31,8 @@ class ReorderControllerSpec extends ObjectBehavior
         $element->getDataIndexer()->willReturn($indexer);
         $element->getObjectManager()->willReturn($om);
         $element->getRepository()->willReturn($repository);
+        $element->getRoute()->willReturn('fsi_admin_crud_list');
+        $element->getRouteParameters()->willReturn(['element' => 'category']);
 
         $this->beConstructedWith($router);
     }
