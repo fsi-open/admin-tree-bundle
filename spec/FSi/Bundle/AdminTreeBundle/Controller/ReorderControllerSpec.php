@@ -16,6 +16,8 @@ use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
 use FSi\Bundle\AdminBundle\Doctrine\Admin\CRUDElement;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Router;
 
 class ReorderControllerSpec extends ObjectBehavior
@@ -25,8 +27,11 @@ class ReorderControllerSpec extends ObjectBehavior
         CRUDElement $element,
         DoctrineDataIndexer $indexer,
         ObjectManager $om,
-        NestedTreeRepository $repository
+        NestedTreeRepository $repository,
+        Request $request,
+        ParameterBag $query
     ) {
+        $request->query = $query;
         $element->getId()->willReturn('category');
         $element->getDataIndexer()->willReturn($indexer);
         $element->getObjectManager()->willReturn($om);
@@ -48,7 +53,8 @@ class ReorderControllerSpec extends ObjectBehavior
         \StdClass $category,
         ObjectManager $om,
         Router $router,
-        DoctrineDataIndexer $indexer
+        DoctrineDataIndexer $indexer,
+        Request $request
     ) {
         $indexer->getData(1)->willReturn($category);
 
@@ -59,7 +65,7 @@ class ReorderControllerSpec extends ObjectBehavior
         $router->generate('fsi_admin_crud_list', Argument::withEntry('element', 'category'))
             ->willReturn('sample-path');
 
-        $response = $this->moveUpAction($element, 1);
+        $response = $this->moveUpAction($element, 1, $request);
         $response->shouldHaveType('Symfony\Component\HttpFoundation\RedirectResponse');
         $response->getTargetUrl()->shouldReturn('sample-path');
     }
@@ -70,7 +76,8 @@ class ReorderControllerSpec extends ObjectBehavior
         \StdClass $category,
         ObjectManager $om,
         Router $router,
-        DoctrineDataIndexer $indexer
+        DoctrineDataIndexer $indexer,
+        Request $request
     ) {
         $indexer->getData(1)->willReturn($category);
 
@@ -81,37 +88,58 @@ class ReorderControllerSpec extends ObjectBehavior
         $router->generate('fsi_admin_crud_list', Argument::withEntry('element', 'category'))
             ->willReturn('sample-path');
 
-        $response = $this->moveDownAction($element, 1);
+        $response = $this->moveDownAction($element, 1, $request);
         $response->shouldHaveType('Symfony\Component\HttpFoundation\RedirectResponse');
         $response->getTargetUrl()->shouldReturn('sample-path');
     }
 
     function it_throws_runtime_exception_when_specified_entity_doesnt_exist(
         CRUDElement $element,
-        DoctrineDataIndexer $indexer
+        DoctrineDataIndexer $indexer,
+        Request $request
     ) {
         $indexer->getData(666)->willThrow('FSi\Component\DataIndexer\Exception\RuntimeException');
 
         $this->shouldThrow('FSi\Component\DataIndexer\Exception\RuntimeException')
-            ->duringMoveUpAction($element, 666);
+            ->duringMoveUpAction($element, 666, $request);
 
         $this->shouldThrow('FSi\Component\DataIndexer\Exception\RuntimeException')
-            ->duringMoveDownAction($element, 666);
+            ->duringMoveDownAction($element, 666, $request);
     }
 
     function it_throws_exception_when_entity_doesnt_have_correct_repository(
         CRUDElement $element,
         EntityRepository $repository,
         DoctrineDataIndexer $indexer,
-        \StdClass $category
+        \StdClass $category,
+        Request $request
     ) {
         $indexer->getData(666)->willReturn($category);
         $element->getRepository()->willReturn($repository);
 
         $this->shouldThrow('\InvalidArgumentException')
-            ->duringMoveUpAction($element, 666);
+            ->duringMoveUpAction($element, 666, $request);
 
         $this->shouldThrow('\InvalidArgumentException')
-            ->duringMoveDownAction($element, 666);
+            ->duringMoveDownAction($element, 666, $request);
+    }
+
+    function it_redirects_to_redirect_uri_parameter_after_operation(
+        CRUDElement $element,
+        DoctrineDataIndexer $indexer,
+        \StdClass $category,
+        Request $request,
+        ParameterBag $query
+    ) {
+        $query->get('redirect_uri')->willReturn('some_redirect_uri');
+        $indexer->getData(1)->willReturn($category);
+
+        $response = $this->moveUpAction($element, 1, $request);
+        $response->shouldHaveType('Symfony\Component\HttpFoundation\RedirectResponse');
+        $response->getTargetUrl()->shouldReturn('some_redirect_uri');
+
+        $response = $this->moveDownAction($element, 1, $request);
+        $response->shouldHaveType('Symfony\Component\HttpFoundation\RedirectResponse');
+        $response->getTargetUrl()->shouldReturn('some_redirect_uri');
     }
 }
