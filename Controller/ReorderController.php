@@ -12,6 +12,7 @@ namespace FSi\Bundle\AdminTreeBundle\Controller;
 use FSi\Bundle\AdminBundle\Admin\CRUD\DataIndexerElement;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Router;
 use FSi\Bundle\AdminBundle\Doctrine\Admin\Element;
@@ -34,9 +35,10 @@ class ReorderController
     /**
      * @param DataIndexerElement $element
      * @param $id
+     * @param Request $request
      * @return RedirectResponse
      */
-    public function moveUpAction(DataIndexerElement $element, $id)
+    public function moveUpAction(DataIndexerElement $element, $id, Request $request)
     {
         $entity = $this->getEntity($element, $id);
 
@@ -47,17 +49,16 @@ class ReorderController
 
         $this->flush($element, $entity);
 
-        return new RedirectResponse(
-            $this->router->generate($element->getRoute(), $element->getRouteParameters())
-        );
+        return $this->getRedirectResponse($element, $request);
     }
 
     /**
      * @param DataIndexerElement $element
      * @param $id
+     * @param Request $request
      * @return RedirectResponse
      */
-    public function moveDownAction(DataIndexerElement $element, $id)
+    public function moveDownAction(DataIndexerElement $element, $id, Request $request)
     {
         $entity = $this->getEntity($element, $id);
 
@@ -68,9 +69,7 @@ class ReorderController
 
         $this->flush($element, $entity);
 
-        return new RedirectResponse(
-            $this->router->generate($element->getRoute(), $element->getRouteParameters())
-        );
+        return $this->getRedirectResponse($element, $request);
     }
 
     /**
@@ -112,5 +111,24 @@ class ReorderController
     {
         $om = $element->getObjectManager();
         $om->flush();
+    }
+
+    /**
+     * @param \FSi\Bundle\AdminBundle\Admin\CRUD\DataIndexerElement $element
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    private function getRedirectResponse(DataIndexerElement $element, Request $request)
+    {
+        if ($request->query->get('redirect_uri')) {
+            $uri = $request->query->get('redirect_uri');
+        } else {
+            $uri = $this->router->generate(
+                $element->getRoute(),
+                $element->getRouteParameters()
+            );
+        }
+
+        return new RedirectResponse($uri);
     }
 }
