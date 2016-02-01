@@ -12,18 +12,18 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "symfony/framework-bundle" : "~2.3",
-        "fsi/admin-bundle" : "1.1.*@dev",
+        "symfony/framework-bundle" : "^2.3",
+        "fsi/admin-bundle" : "~1.1@dev",
         "gedmo/doctrine-extensions": "2.3.*"
     },
     "require-dev": {
-        "phpspec/phpspec": "2.0.*@dev"
+        "phpspec/phpspec": "^2.4"
     },
     "config": {
         "bin-dir": "bin"
     },
     "autoload": {
-        "psr-0": {
+        "psr-4": {
             "FSi\\Bundle\\AdminTreeBundle\\": ""
         }
     },
