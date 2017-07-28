@@ -2,23 +2,28 @@ language: php
 
 sudo: false
 
+cache:
+    directories:
+        - $HOME/.composer/cache
+        - bin
+        - vendor
+
 matrix:
   include:
     - php: 5.4
       env:
-        - DEPENDENCIES='low'
+        - COMPOSER_FLAGS='--prefer-lowest'
     - php: 5.5
     - php: 5.6
     - php: 7.0
+    - php: 7.1
 
 before_script:
     - phpenv config-rm xdebug.ini
-    - composer self-update
-    - if [[ "$DEPENDENCIES" == "low" ]]; then composer update --prefer-lowest; fi;
-    - if [[ !$DEPENDENCIES ]]; then composer update -n; fi;
+    - composer update $COMPOSER_FLAGS
 
 script:
-    - ./bin/phpspec run -f pretty
+    - bin/phpspec run -f pretty
 
 notifications:
   irc: "irc.freenode.org#fsi-open"
