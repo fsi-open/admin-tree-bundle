@@ -50,7 +50,7 @@ class ReorderControllerSpec extends ObjectBehavior
     function it_moves_up_item_when_move_up_action_called(
         CRUDElement $element,
         NestedTreeRepository $repository,
-        \StdClass $category,
+        \stdClass $category,
         ObjectManager $om,
         Router $router,
         DoctrineDataIndexer $indexer,
@@ -73,7 +73,7 @@ class ReorderControllerSpec extends ObjectBehavior
     function it_moves_down_item_when_move_down_action_called(
         CRUDElement $element,
         NestedTreeRepository $repository,
-        \StdClass $category,
+        \stdClass $category,
         ObjectManager $om,
         Router $router,
         DoctrineDataIndexer $indexer,
@@ -111,7 +111,7 @@ class ReorderControllerSpec extends ObjectBehavior
         CRUDElement $element,
         EntityRepository $repository,
         DoctrineDataIndexer $indexer,
-        \StdClass $category,
+        \stdClass $category,
         Request $request
     ) {
         $indexer->getData(666)->willReturn($category);
@@ -127,7 +127,7 @@ class ReorderControllerSpec extends ObjectBehavior
     function it_redirects_to_redirect_uri_parameter_after_operation(
         CRUDElement $element,
         DoctrineDataIndexer $indexer,
-        \StdClass $category,
+        \stdClass $category,
         Request $request,
         ParameterBag $query
     ) {

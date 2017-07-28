@@ -9,72 +9,61 @@
 
 namespace FSi\Bundle\AdminTreeBundle\Controller;
 
+use Doctrine\ORM\EntityRepository;
 use FSi\Bundle\AdminBundle\Admin\CRUD\DataIndexerElement;
+use FSi\Bundle\AdminBundle\Doctrine\Admin\Element;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Router;
-use FSi\Bundle\AdminBundle\Doctrine\Admin\Element;
+use Symfony\Component\Routing\RouterInterface;
 
 class ReorderController
 {
     /**
-     * @var Router
+     * @var RouterInterface
      */
     private $router;
 
-    /**
-     * @param Router $router
-     */
-    public function __construct(Router $router)
+    public function __construct(RouterInterface $router)
     {
         $this->router = $router;
     }
 
     /**
      * @param DataIndexerElement $element
-     * @param $id
+     * @param mixed $id
      * @param Request $request
      * @return RedirectResponse
      */
     public function moveUpAction(DataIndexerElement $element, $id, Request $request)
     {
-        $entity = $this->getEntity($element, $id);
+        $this->getRepository($element)->moveUp($this->getEntity($element, $id));
 
-        /** @var $repository \Gedmo\Tree\Entity\Repository\NestedTreeRepository */
-        $repository = $element->getRepository();
-        $this->assertCorrectRepositoryType($repository);
-        $repository->moveUp($entity);
-
-        $this->flush($element, $entity);
+        $this->flush($element);
 
         return $this->getRedirectResponse($element, $request);
     }
 
     /**
      * @param DataIndexerElement $element
-     * @param $id
+     * @param mixed $id
      * @param Request $request
      * @return RedirectResponse
      */
     public function moveDownAction(DataIndexerElement $element, $id, Request $request)
     {
-        $entity = $this->getEntity($element, $id);
+        $this->getRepository($element)->moveDown($this->getEntity($element, $id));
 
-        /** @var $repository \Gedmo\Tree\Entity\Repository\NestedTreeRepository */
-        $repository = $element->getRepository();
-        $this->assertCorrectRepositoryType($repository);
-        $repository->moveDown($entity);
-
-        $this->flush($element, $entity);
+        $this->flush($element);
 
         return $this->getRedirectResponse($element, $request);
     }
 
     /**
      * @param DataIndexerElement $element
-     * @param int $id
+     * @param mixed $id
      * @throws NotFoundHttpException
      * @return Object
      */
@@ -90,14 +79,25 @@ class ReorderController
     }
 
     /**
-     * @param $repository
-     * @throws \InvalidArgumentException
-     * @internal param \FSi\Bundle\AdminBundle\Admin\Doctrine\CRUDElement $element
+     * @param Element $element
+     * @return NestedTreeRepository
+     */
+    private function getRepository(Element $element)
+    {
+        $repository = $element->getRepository();
+        $this->assertCorrectRepositoryType($repository);
+
+        return $repository;
+    }
+
+    /**
+     * @param EntityRepository $repository
+     * @throws InvalidArgumentException
      */
     private function assertCorrectRepositoryType($repository)
     {
         if (!$repository instanceof NestedTreeRepository) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf("Entity must have repository class 'NestedTreeRepository'")
             );
         }
@@ -105,18 +105,16 @@ class ReorderController
 
     /**
      * @param Element $element
-     * @param $entity
      */
-    private function flush(Element $element, $entity)
+    private function flush(Element $element)
     {
-        $om = $element->getObjectManager();
-        $om->flush();
+        $element->getObjectManager()->flush();
     }
 
     /**
-     * @param \FSi\Bundle\AdminBundle\Admin\CRUD\DataIndexerElement $element
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @param DataIndexerElement $element
+     * @param Request $request
+     * @return RedirectResponse
      */
     private function getRedirectResponse(DataIndexerElement $element, Request $request)
     {
