@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace FSi\Bundle\AdminTreeBundle\Controller;
 
 use Doctrine\ORM\EntityRepository;
@@ -31,12 +33,6 @@ class ReorderController
         $this->router = $router;
     }
 
-    /**
-     * @param DataIndexerElement $element
-     * @param mixed $id
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function moveUpAction(DataIndexerElement $element, $id, Request $request)
     {
         $this->getRepository($element)->moveUp($this->getEntity($element, $id));
@@ -46,12 +42,6 @@ class ReorderController
         return $this->getRedirectResponse($element, $request);
     }
 
-    /**
-     * @param DataIndexerElement $element
-     * @param mixed $id
-     * @param Request $request
-     * @return RedirectResponse
-     */
     public function moveDownAction(DataIndexerElement $element, $id, Request $request)
     {
         $this->getRepository($element)->moveDown($this->getEntity($element, $id));
@@ -78,11 +68,7 @@ class ReorderController
         return $entity;
     }
 
-    /**
-     * @param Element $element
-     * @return NestedTreeRepository
-     */
-    private function getRepository(Element $element)
+    private function getRepository(Element $element): NestedTreeRepository
     {
         $repository = $element->getRepository();
         $this->assertCorrectRepositoryType($repository);
@@ -90,11 +76,7 @@ class ReorderController
         return $repository;
     }
 
-    /**
-     * @param EntityRepository $repository
-     * @throws InvalidArgumentException
-     */
-    private function assertCorrectRepositoryType($repository)
+    private function assertCorrectRepositoryType(EntityRepository $repository): void
     {
         if (!$repository instanceof NestedTreeRepository) {
             throw new InvalidArgumentException(
@@ -103,20 +85,12 @@ class ReorderController
         }
     }
 
-    /**
-     * @param Element $element
-     */
-    private function flush(Element $element)
+    private function flush(Element $element): void
     {
         $element->getObjectManager()->flush();
     }
 
-    /**
-     * @param DataIndexerElement $element
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    private function getRedirectResponse(DataIndexerElement $element, Request $request)
+    private function getRedirectResponse(DataIndexerElement $element, Request $request): RedirectResponse
     {
         if ($request->query->get('redirect_uri')) {
             $uri = $request->query->get('redirect_uri');
