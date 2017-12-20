@@ -7,15 +7,17 @@
  * file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace spec\FSi\Bundle\AdminTreeBundle;
 
 use PhpSpec\ObjectBehavior;
-use Prophecy\Argument;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class FSiAdminTreeBundleSpec extends ObjectBehavior
 {
     function it_is_bundle()
     {
-        $this->shouldHaveType('Symfony\Component\HttpKernel\Bundle\Bundle');
+        $this->shouldHaveType(Bundle::class);
     }
 }

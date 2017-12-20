@@ -17,7 +17,8 @@ matrix:
 
 before_script:
     - phpenv config-rm xdebug.ini
-    - composer update $COMPOSER_FLAGS
+    - travis_wait 40 composer update $COMPOSER_FLAGS
+    - composer validate
 
 script:
     - bin/phpspec run -f pretty
