@@ -1,8 +1,8 @@
 # CHANGELOG for version 2.0
 
-## Symfony3 support
+## Extended Symfony support
 
-As of this version, both Symfony 2 and 3 are suported.
+As of this version, Symfony in 2, 4 and 4 versions is suported.
 
 ## Dropped support for PHP below 7.1
 

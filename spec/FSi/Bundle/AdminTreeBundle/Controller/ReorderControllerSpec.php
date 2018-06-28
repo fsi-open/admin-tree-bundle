@@ -25,12 +25,12 @@ use stdClass;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Router;
+use Symfony\Component\Routing\RouterInterface;
 
 class ReorderControllerSpec extends ObjectBehavior
 {
     function let(
-        Router $router,
+        RouterInterface $router,
         CRUDElement $element,
         DoctrineDataIndexer $indexer,
         ObjectManager $om,
@@ -59,7 +59,7 @@ class ReorderControllerSpec extends ObjectBehavior
         NestedTreeRepository $repository,
         stdClass $category,
         ObjectManager $om,
-        Router $router,
+        RouterInterface $router,
         DoctrineDataIndexer $indexer,
         Request $request
     ) {
@@ -84,7 +84,7 @@ class ReorderControllerSpec extends ObjectBehavior
         NestedTreeRepository $repository,
         stdClass $category,
         ObjectManager $om,
-        Router $router,
+        RouterInterface $router,
         DoctrineDataIndexer $indexer,
         Request $request
     ) {
@@ -111,11 +111,8 @@ class ReorderControllerSpec extends ObjectBehavior
     ) {
         $indexer->getData(666)->willThrow(RuntimeException::class);
 
-        $this->shouldThrow(RuntimeException::class)
-            ->duringMoveUpAction($element, 666, $request);
-
-        $this->shouldThrow(RuntimeException::class)
-            ->duringMoveDownAction($element, 666, $request);
+        $this->shouldThrow(RuntimeException::class)->duringMoveUpAction($element, 666, $request);
+        $this->shouldThrow(RuntimeException::class)->duringMoveDownAction($element, 666, $request);
     }
 
     function it_throws_exception_when_entity_doesnt_have_correct_repository(
@@ -128,11 +125,8 @@ class ReorderControllerSpec extends ObjectBehavior
         $indexer->getData(666)->willReturn($category);
         $element->getRepository()->willReturn($repository);
 
-        $this->shouldThrow(InvalidArgumentException::class)
-            ->duringMoveUpAction($element, 666, $request);
-
-        $this->shouldThrow(InvalidArgumentException::class)
-            ->duringMoveDownAction($element, 666, $request);
+        $this->shouldThrow(InvalidArgumentException::class)->duringMoveUpAction($element, 666, $request);
+        $this->shouldThrow(InvalidArgumentException::class)->duringMoveDownAction($element, 666, $request);
     }
 
     function it_redirects_to_redirect_uri_parameter_after_operation(

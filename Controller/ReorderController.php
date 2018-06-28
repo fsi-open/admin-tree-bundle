@@ -36,7 +36,6 @@ class ReorderController
     public function moveUpAction(DataIndexerElement $element, $id, Request $request)
     {
         $this->getRepository($element)->moveUp($this->getEntity($element, $id));
-
         $this->flush($element);
 
         return $this->getRedirectResponse($element, $request);
@@ -45,7 +44,6 @@ class ReorderController
     public function moveDownAction(DataIndexerElement $element, $id, Request $request)
     {
         $this->getRepository($element)->moveDown($this->getEntity($element, $id));
-
         $this->flush($element);
 
         return $this->getRedirectResponse($element, $request);
@@ -61,8 +59,12 @@ class ReorderController
     {
         $entity = $element->getDataIndexer()->getData($id);
 
-        if (!$entity) {
-            throw new NotFoundHttpException();
+        if (null === $entity) {
+            throw new NotFoundHttpException(sprintf(
+                'Entity for element "%s" with id "%s" was not found!',
+                $element->getId(),
+                $id
+            ));
         }
 
         return $entity;
@@ -78,7 +80,7 @@ class ReorderController
 
     private function assertCorrectRepositoryType(EntityRepository $repository): void
     {
-        if (!$repository instanceof NestedTreeRepository) {
+        if (false === $repository instanceof NestedTreeRepository) {
             throw new InvalidArgumentException(
                 sprintf("Entity must have repository class 'NestedTreeRepository'")
             );
