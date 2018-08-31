@@ -9,8 +9,8 @@ Add to `composer.json`:
 
 ```yaml
 "require": {
-    "stof/doctrine-extensions-bundle": "~1.1@dev",
-    "fsi/admin-tree-bundle": "dev-master",
+    "stof/doctrine-extensions-bundle": "^1.3",
+    "fsi/admin-tree-bundle": "^2.0",
 }
 ```
 
