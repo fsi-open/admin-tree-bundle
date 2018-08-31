@@ -9,7 +9,7 @@
     </parameters>
 
     <services>
-        <service id="fsi_tree.controller.reorder" class="%fsi_tree.controller.class%">
+        <service id="fsi_tree.controller.reorder" class="%fsi_tree.controller.class%" public="true">
             <argument type="service" id="router" />
         </service>
     </services>
