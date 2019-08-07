@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace FSi\Bundle\AdminTreeBundle\Controller;
 
-use Doctrine\ORM\EntityRepository;
 use FSi\Bundle\AdminBundle\Admin\CRUD\DataIndexerElement;
 use FSi\Bundle\AdminBundle\Doctrine\Admin\Element;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
@@ -53,12 +52,11 @@ class ReorderController
      * @param DataIndexerElement $element
      * @param mixed $id
      * @throws NotFoundHttpException
-     * @return Object
+     * @return object
      */
     private function getEntity(DataIndexerElement $element, $id)
     {
         $entity = $element->getDataIndexer()->getData($id);
-
         if (null === $entity) {
             throw new NotFoundHttpException(sprintf(
                 'Entity for element "%s" with id "%s" was not found!',
@@ -73,18 +71,15 @@ class ReorderController
     private function getRepository(Element $element): NestedTreeRepository
     {
         $repository = $element->getRepository();
-        $this->assertCorrectRepositoryType($repository);
+        if (false === $repository instanceof NestedTreeRepository) {
+            throw new InvalidArgumentException(sprintf(
+                'Repository "%s" needs to extend "%s',
+                get_class($repository),
+                NestedTreeRepository::class
+            ));
+        }
 
         return $repository;
-    }
-
-    private function assertCorrectRepositoryType(EntityRepository $repository): void
-    {
-        if (false === $repository instanceof NestedTreeRepository) {
-            throw new InvalidArgumentException(
-                sprintf("Entity must have repository class 'NestedTreeRepository'")
-            );
-        }
     }
 
     private function flush(Element $element): void
