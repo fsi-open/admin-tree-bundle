@@ -11,22 +11,20 @@
         }
     ],
     "require": {
-        "doctrine/orm": "^2.5.2",
-        "fsi/admin-bundle" : "~2.0|~3.0",
-        "gedmo/doctrine-extensions": "~2.4",
+        "doctrine/orm": "^2.5",
+        "fsi/admin-bundle" : "3.1",
+        "gedmo/doctrine-extensions": "^2.4",
         "php": ">=7.1",
-        "symfony/config" : "~2.4|~3.0|~4.0",
-        "symfony/dependency-injection" : "^2.6.2|~3.0|~4.0",
-        "symfony/framework-bundle" : "~2.4|~3.0|~4.0",
-        "symfony/http-foundation" : "~2.4|~3.0|~4.0",
-        "symfony/http-kernel" : "~2.4|~3.0|~4.0",
-        "symfony/routing" : "~2.3|~3.0|~4.0"
+        "symfony/config" : "^3.4|^4.0",
+        "symfony/dependency-injection" : "^3.4|^4.0",
+        "symfony/framework-bundle" : "^3.4|^4.0",
+        "symfony/http-foundation" : "^3.4|^4.0",
+        "symfony/http-kernel" : "^3.4|^4.0",
+        "symfony/routing" : "^3.4|^4.0"
     },
     "require-dev": {
-        "phpspec/phpspec": "~3.4|~4.3",
-        "phpspec/prophecy": "^1.7.6",
-        "sebastian/comparator": "~3.0",
-        "sebastian/exporter": "~3.0"
+        "phpspec/phpspec": "^5.0",
+        "phpspec/prophecy": "^1.7"
     },
     "config": {
         "bin-dir": "vendor/bin"
