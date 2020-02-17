@@ -9,11 +9,11 @@ matrix:
     - php: 7.1
       env:
         - COMPOSER_FLAGS='--prefer-lowest'
-    - php: 7.3
+    - php: 7.4
 
 before_script:
     - phpenv config-rm xdebug.ini
-    - COMPOSER_MEMORY_LIMIT=-1 travis_wait 20 composer update $COMPOSER_FLAGS
+    - composer update $COMPOSER_FLAGS
     - composer validate
 
 script:

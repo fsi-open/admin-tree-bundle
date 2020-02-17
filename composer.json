@@ -23,8 +23,8 @@
         "symfony/routing" : "^3.4|^4.0"
     },
     "require-dev": {
-        "phpspec/phpspec": "^5.0",
-        "phpspec/prophecy": "^1.7"
+        "phpspec/phpspec": "^5.0|^6.0",
+        "phpdocumentor/reflection-docblock": "^3.1"
     },
     "config": {
         "bin-dir": "vendor/bin"

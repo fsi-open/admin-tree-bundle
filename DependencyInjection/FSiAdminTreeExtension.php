@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-class FSiAdminTreeExtension extends Extension
+final class FSiAdminTreeExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -24,6 +24,7 @@ class FSiAdminTreeExtension extends Extension
             $container,
             new FileLocator(__DIR__.'/../Resources/config')
         );
+
         $loader->load('services.xml');
     }
 }
