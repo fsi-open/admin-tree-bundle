@@ -16,9 +16,12 @@ use FSi\Bundle\AdminBundle\Doctrine\Admin\Element;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
+use function get_class;
+use function sprintf;
 
 class ReorderController
 {
@@ -32,7 +35,7 @@ class ReorderController
         $this->router = $router;
     }
 
-    public function moveUpAction(DataIndexerElement $element, $id, Request $request)
+    public function moveUpAction(DataIndexerElement $element, $id, Request $request): Response
     {
         $this->getRepository($element)->moveUp($this->getEntity($element, $id));
         $this->flush($element);
@@ -40,7 +43,7 @@ class ReorderController
         return $this->getRedirectResponse($element, $request);
     }
 
-    public function moveDownAction(DataIndexerElement $element, $id, Request $request)
+    public function moveDownAction(DataIndexerElement $element, $id, Request $request): Response
     {
         $this->getRepository($element)->moveDown($this->getEntity($element, $id));
         $this->flush($element);
@@ -92,10 +95,7 @@ class ReorderController
         if ($request->query->get('redirect_uri')) {
             $uri = $request->query->get('redirect_uri');
         } else {
-            $uri = $this->router->generate(
-                $element->getRoute(),
-                $element->getRouteParameters()
-            );
+            $uri = $this->router->generate($element->getRoute(), $element->getRouteParameters());
         }
 
         return new RedirectResponse($uri);

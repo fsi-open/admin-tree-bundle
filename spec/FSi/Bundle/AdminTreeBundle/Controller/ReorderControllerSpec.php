@@ -27,9 +27,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
-class ReorderControllerSpec extends ObjectBehavior
+final class ReorderControllerSpec extends ObjectBehavior
 {
-    function let(
+    public function let(
         RouterInterface $router,
         CRUDElement $element,
         DoctrineDataIndexer $indexer,
@@ -49,12 +49,12 @@ class ReorderControllerSpec extends ObjectBehavior
         $this->beConstructedWith($router);
     }
 
-    function it_is_initializable()
+    public function it_is_initializable(): void
     {
         $this->shouldHaveType(ReorderController::class);
     }
 
-    function it_moves_up_item_when_move_up_action_called(
+    public function it_moves_up_item_when_move_up_action_called(
         CRUDElement $element,
         NestedTreeRepository $repository,
         stdClass $category,
@@ -62,7 +62,7 @@ class ReorderControllerSpec extends ObjectBehavior
         RouterInterface $router,
         DoctrineDataIndexer $indexer,
         Request $request
-    ) {
+    ): void {
         $indexer->getData(1)->willReturn($category);
 
         $repository->moveUp($category)->shouldBeCalled();
@@ -79,7 +79,7 @@ class ReorderControllerSpec extends ObjectBehavior
         $response->getTargetUrl()->shouldReturn('sample-path');
     }
 
-    function it_moves_down_item_when_move_down_action_called(
+    public function it_moves_down_item_when_move_down_action_called(
         CRUDElement $element,
         NestedTreeRepository $repository,
         stdClass $category,
@@ -87,7 +87,7 @@ class ReorderControllerSpec extends ObjectBehavior
         RouterInterface $router,
         DoctrineDataIndexer $indexer,
         Request $request
-    ) {
+    ): void {
         $indexer->getData(1)->willReturn($category);
 
         $repository->moveDown($category)->shouldBeCalled();
@@ -104,24 +104,24 @@ class ReorderControllerSpec extends ObjectBehavior
         $response->getTargetUrl()->shouldReturn('sample-path');
     }
 
-    function it_throws_runtime_exception_when_specified_entity_doesnt_exist(
+    public function it_throws_runtime_exception_when_specified_entity_doesnt_exist(
         CRUDElement $element,
         DoctrineDataIndexer $indexer,
         Request $request
-    ) {
+    ): void {
         $indexer->getData(666)->willThrow(RuntimeException::class);
 
         $this->shouldThrow(RuntimeException::class)->duringMoveUpAction($element, 666, $request);
         $this->shouldThrow(RuntimeException::class)->duringMoveDownAction($element, 666, $request);
     }
 
-    function it_throws_exception_when_entity_doesnt_have_correct_repository(
+    public function it_throws_exception_when_entity_doesnt_have_correct_repository(
         CRUDElement $element,
         EntityRepository $repository,
         DoctrineDataIndexer $indexer,
         stdClass $category,
         Request $request
-    ) {
+    ): void {
         $indexer->getData(666)->willReturn($category);
         $element->getRepository()->willReturn($repository);
 
@@ -129,13 +129,13 @@ class ReorderControllerSpec extends ObjectBehavior
         $this->shouldThrow(InvalidArgumentException::class)->duringMoveDownAction($element, 666, $request);
     }
 
-    function it_redirects_to_redirect_uri_parameter_after_operation(
+    public function it_redirects_to_redirect_uri_parameter_after_operation(
         CRUDElement $element,
         DoctrineDataIndexer $indexer,
         stdClass $category,
         Request $request,
         ParameterBag $query
-    ) {
+    ): void {
         $query->get('redirect_uri')->willReturn('some_redirect_uri');
         $indexer->getData(1)->willReturn($category);
 
