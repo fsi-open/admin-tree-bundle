@@ -15,6 +15,8 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityRepository;
 use FSi\Bundle\AdminBundle\Doctrine\Admin\CRUDElement;
 use FSi\Bundle\AdminTreeBundle\Controller\ReorderController;
+use FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent;
+use FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent;
 use FSi\Component\DataIndexer\DoctrineDataIndexer;
 use FSi\Component\DataIndexer\Exception\RuntimeException;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
@@ -22,6 +24,7 @@ use InvalidArgumentException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use stdClass;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,6 +34,7 @@ final class ReorderControllerSpec extends ObjectBehavior
 {
     public function let(
         RouterInterface $router,
+        EventDispatcherInterface $eventDispatcher,
         CRUDElement $element,
         DoctrineDataIndexer $indexer,
         ObjectManager $om,
@@ -46,7 +50,7 @@ final class ReorderControllerSpec extends ObjectBehavior
         $element->getRoute()->willReturn('fsi_admin_crud_list');
         $element->getRouteParameters()->willReturn(['element' => 'category']);
 
-        $this->beConstructedWith($router);
+        $this->beConstructedWith($router, $eventDispatcher);
     }
 
     public function it_is_initializable(): void
@@ -61,6 +65,7 @@ final class ReorderControllerSpec extends ObjectBehavior
         ObjectManager $om,
         RouterInterface $router,
         DoctrineDataIndexer $indexer,
+        EventDispatcherInterface $eventDispatcher,
         Request $request
     ): void {
         $indexer->getData(1)->willReturn($category);
@@ -68,6 +73,11 @@ final class ReorderControllerSpec extends ObjectBehavior
         $repository->moveUp($category)->shouldBeCalled();
 
         $om->flush()->shouldBeCalled();
+
+        $eventDispatcher->dispatch(
+            Argument::type(MovedUpTreeEvent::class),
+            'FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent'
+        )->shouldBeCalled();
 
         $router->generate(
             'fsi_admin_crud_list',
@@ -86,6 +96,7 @@ final class ReorderControllerSpec extends ObjectBehavior
         ObjectManager $om,
         RouterInterface $router,
         DoctrineDataIndexer $indexer,
+        EventDispatcherInterface $eventDispatcher,
         Request $request
     ): void {
         $indexer->getData(1)->willReturn($category);
@@ -93,6 +104,11 @@ final class ReorderControllerSpec extends ObjectBehavior
         $repository->moveDown($category)->shouldBeCalled();
 
         $om->flush()->shouldBeCalled();
+
+        $eventDispatcher->dispatch(
+            Argument::type(MovedDownTreeEvent::class),
+            'FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent'
+        )->shouldBeCalled();
 
         $router->generate(
             'fsi_admin_crud_list',
@@ -130,6 +146,7 @@ final class ReorderControllerSpec extends ObjectBehavior
     }
 
     public function it_redirects_to_redirect_uri_parameter_after_operation(
+        EventDispatcherInterface $eventDispatcher,
         CRUDElement $element,
         DoctrineDataIndexer $indexer,
         stdClass $category,
@@ -139,10 +156,18 @@ final class ReorderControllerSpec extends ObjectBehavior
         $query->get('redirect_uri')->willReturn('some_redirect_uri');
         $indexer->getData(1)->willReturn($category);
 
+        $eventDispatcher->dispatch(
+            Argument::type(MovedUpTreeEvent::class),
+            'FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent'
+        )->shouldBeCalled();
         $response = $this->moveUpAction($element, 1, $request);
         $response->shouldHaveType(RedirectResponse::class);
         $response->getTargetUrl()->shouldReturn('some_redirect_uri');
 
+        $eventDispatcher->dispatch(
+            Argument::type(MovedDownTreeEvent::class),
+            'FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent'
+        )->shouldBeCalled();
         $response = $this->moveDownAction($element, 1, $request);
         $response->shouldHaveType(RedirectResponse::class);
         $response->getTargetUrl()->shouldReturn('some_redirect_uri');
