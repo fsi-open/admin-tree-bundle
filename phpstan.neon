@@ -17,10 +17,6 @@ parameters:
         - '%currentWorkingDirectory%/Resources'
         - '%currentWorkingDirectory%/spec'
         - '%currentWorkingDirectory%/vendor'
-    ignoreErrors:
-        -
-            message: '#Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface::dispatch\(\) invoked with 2 parameters\, 1 required\.#'
-            path: '%currentWorkingDirectory%/Controller/ReorderController'
 rules:
     - PHPStan\Rules\BooleansInConditions\BooleanInBooleanAndRule
     - PHPStan\Rules\BooleansInConditions\BooleanInBooleanNotRule

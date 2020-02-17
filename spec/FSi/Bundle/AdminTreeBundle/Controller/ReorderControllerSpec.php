@@ -23,6 +23,7 @@ use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
 use InvalidArgumentException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
+use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use stdClass;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -74,10 +75,14 @@ final class ReorderControllerSpec extends ObjectBehavior
 
         $om->flush()->shouldBeCalled();
 
-        $eventDispatcher->dispatch(
-            Argument::type(MovedUpTreeEvent::class),
-            'FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent'
-        )->shouldBeCalled();
+        if (true === is_subclass_of(EventDispatcherInterface::class, PsrEventDispatcherInterface::class)) {
+            $eventDispatcher->dispatch(Argument::type(MovedUpTreeEvent::class))->shouldBeCalled();
+        } else {
+            $eventDispatcher->dispatch(
+                'FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent',
+                Argument::type(MovedUpTreeEvent::class)
+            )->shouldBeCalled();
+        }
 
         $router->generate(
             'fsi_admin_crud_list',
@@ -105,10 +110,14 @@ final class ReorderControllerSpec extends ObjectBehavior
 
         $om->flush()->shouldBeCalled();
 
-        $eventDispatcher->dispatch(
-            Argument::type(MovedDownTreeEvent::class),
-            'FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent'
-        )->shouldBeCalled();
+        if (true === is_subclass_of(EventDispatcherInterface::class, PsrEventDispatcherInterface::class)) {
+            $eventDispatcher->dispatch(Argument::type(MovedDownTreeEvent::class))->shouldBeCalled();
+        } else {
+            $eventDispatcher->dispatch(
+                'FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent',
+                Argument::type(MovedDownTreeEvent::class)
+            )->shouldBeCalled();
+        }
 
         $router->generate(
             'fsi_admin_crud_list',
@@ -156,18 +165,28 @@ final class ReorderControllerSpec extends ObjectBehavior
         $query->get('redirect_uri')->willReturn('some_redirect_uri');
         $indexer->getData(1)->willReturn($category);
 
-        $eventDispatcher->dispatch(
-            Argument::type(MovedUpTreeEvent::class),
-            'FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent'
-        )->shouldBeCalled();
+        if (true === is_subclass_of(EventDispatcherInterface::class, PsrEventDispatcherInterface::class)) {
+            $eventDispatcher->dispatch(Argument::type(MovedUpTreeEvent::class))->shouldBeCalled();
+        } else {
+            $eventDispatcher->dispatch(
+                'FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent',
+                Argument::type(MovedUpTreeEvent::class)
+            )->shouldBeCalled();
+        }
+
         $response = $this->moveUpAction($element, 1, $request);
         $response->shouldHaveType(RedirectResponse::class);
         $response->getTargetUrl()->shouldReturn('some_redirect_uri');
 
-        $eventDispatcher->dispatch(
-            Argument::type(MovedDownTreeEvent::class),
-            'FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent'
-        )->shouldBeCalled();
+        if (true === is_subclass_of(EventDispatcherInterface::class, PsrEventDispatcherInterface::class)) {
+            $eventDispatcher->dispatch(Argument::type(MovedDownTreeEvent::class))->shouldBeCalled();
+        } else {
+            $eventDispatcher->dispatch(
+                'FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent',
+                Argument::type(MovedDownTreeEvent::class)
+            )->shouldBeCalled();
+        }
+
         $response = $this->moveDownAction($element, 1, $request);
         $response->shouldHaveType(RedirectResponse::class);
         $response->getTargetUrl()->shouldReturn('some_redirect_uri');

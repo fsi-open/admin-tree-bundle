@@ -14,10 +14,12 @@ namespace FSi\Bundle\AdminTreeBundle\Controller;
 use FSi\Bundle\AdminBundle\Admin\CRUD\DataIndexerElement;
 use FSi\Bundle\AdminBundle\Admin\Element as AdminElement;
 use FSi\Bundle\AdminBundle\Doctrine\Admin\Element as AdminDoctrineElement;
+use FSi\Bundle\AdminBundle\Event\AdminEvent;
 use FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent;
 use FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
 use InvalidArgumentException;
+use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,7 +37,7 @@ class ReorderController
     private $router;
 
     /**
-     * @var EventDispatcherInterface
+     * @var EventDispatcherInterface|PsrEventDispatcherInterface
      */
     private $eventDispatcher;
 
@@ -58,10 +60,7 @@ class ReorderController
         $this->getRepository($element)->moveUp($entity);
         $element->getObjectManager()->flush();
 
-        $this->eventDispatcher->dispatch(
-            new MovedUpTreeEvent($element, $request, $entity),
-            MovedUpTreeEvent::class
-        );
+        $this->dispatchEvent(new MovedUpTreeEvent($element, $request, $entity));
 
         return $this->getRedirectResponse($element, $request);
     }
@@ -79,12 +78,20 @@ class ReorderController
         $this->getRepository($element)->moveDown($entity);
         $element->getObjectManager()->flush();
 
-        $this->eventDispatcher->dispatch(
-            new MovedDownTreeEvent($element, $request, $entity),
-            MovedDownTreeEvent::class
-        );
+        $this->dispatchEvent(new MovedDownTreeEvent($element, $request, $entity));
 
         return $this->getRedirectResponse($element, $request);
+    }
+
+    private function dispatchEvent(AdminEvent $event): void
+    {
+        if (true === interface_exists(PsrEventDispatcherInterface::class)
+            && true === $this->eventDispatcher instanceof PsrEventDispatcherInterface
+        ) {
+            $this->eventDispatcher->dispatch($event);
+        } elseif (true === $this->eventDispatcher instanceof EventDispatcherInterface) {
+            $this->eventDispatcher->dispatch(get_class($event), $event);
+        }
     }
 
     /**
