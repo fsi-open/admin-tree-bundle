@@ -89,7 +89,7 @@ class ReorderController
             && true === $this->eventDispatcher instanceof PsrEventDispatcherInterface
         ) {
             $this->eventDispatcher->dispatch($event);
-        } elseif (true === $this->eventDispatcher instanceof EventDispatcherInterface) {
+        } else {
             $this->eventDispatcher->dispatch(get_class($event), $event);
         }
     }

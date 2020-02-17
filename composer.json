@@ -24,11 +24,7 @@
     },
     "require-dev": {
         "phpspec/phpspec": "^5.0|^6.0",
-        "phpdocumentor/reflection-docblock": "^3.1",
-        "phpstan/phpstan": "^0.12.11",
-        "phpstan/phpstan-doctrine": "^0.12.9",
-        "phpstan/phpstan-strict-rules": "^0.12.2",
-        "psr/event-dispatcher": "^1.0"
+        "phpdocumentor/reflection-docblock": "^3.1"
     },
     "config": {
         "bin-dir": "vendor/bin"
