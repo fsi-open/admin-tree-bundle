@@ -18,3 +18,4 @@ before_script:
 
 script:
     - vendor/bin/phpspec run -f pretty
+    - vendor/bin/phpunit analyse -l 7 -c phpstan.neon .
