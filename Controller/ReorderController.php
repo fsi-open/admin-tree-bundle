@@ -12,13 +12,22 @@ declare(strict_types=1);
 namespace FSi\Bundle\AdminTreeBundle\Controller;
 
 use FSi\Bundle\AdminBundle\Admin\CRUD\DataIndexerElement;
-use FSi\Bundle\AdminBundle\Doctrine\Admin\Element;
+use FSi\Bundle\AdminBundle\Admin\Element as AdminElement;
+use FSi\Bundle\AdminBundle\Doctrine\Admin\Element as AdminDoctrineElement;
+use FSi\Bundle\AdminBundle\Event\AdminEvent;
+use FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent;
+use FSi\Bundle\AdminTreeBundle\Event\MovedUpTreeEvent;
 use Gedmo\Tree\Entity\Repository\NestedTreeRepository;
 use InvalidArgumentException;
+use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
+use function get_class;
+use function sprintf;
 
 class ReorderController
 {
@@ -27,25 +36,62 @@ class ReorderController
      */
     private $router;
 
-    public function __construct(RouterInterface $router)
+    /**
+     * @var EventDispatcherInterface|PsrEventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    public function __construct(RouterInterface $router, EventDispatcherInterface $eventDispatcher)
     {
         $this->router = $router;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
-    public function moveUpAction(DataIndexerElement $element, $id, Request $request)
+    /**
+     * @param DataIndexerElement&AdminDoctrineElement $element
+     * @param mixed $id
+     * @param Request $request
+     * @return Response
+     */
+    public function moveUpAction(DataIndexerElement $element, $id, Request $request): Response
     {
-        $this->getRepository($element)->moveUp($this->getEntity($element, $id));
-        $this->flush($element);
+        $entity = $this->getEntity($element, $id);
+
+        $this->getRepository($element)->moveUp($entity);
+        $element->getObjectManager()->flush();
+
+        $this->dispatchEvent(new MovedUpTreeEvent($element, $request, $entity));
 
         return $this->getRedirectResponse($element, $request);
     }
 
-    public function moveDownAction(DataIndexerElement $element, $id, Request $request)
+    /**
+     * @param DataIndexerElement&AdminDoctrineElement $element
+     * @param mixed $id
+     * @param Request $request
+     * @return Response
+     */
+    public function moveDownAction(DataIndexerElement $element, $id, Request $request): Response
     {
-        $this->getRepository($element)->moveDown($this->getEntity($element, $id));
-        $this->flush($element);
+        $entity = $this->getEntity($element, $id);
+
+        $this->getRepository($element)->moveDown($entity);
+        $element->getObjectManager()->flush();
+
+        $this->dispatchEvent(new MovedDownTreeEvent($element, $request, $entity));
 
         return $this->getRedirectResponse($element, $request);
+    }
+
+    private function dispatchEvent(AdminEvent $event): void
+    {
+        if (true === interface_exists(PsrEventDispatcherInterface::class)
+            && true === $this->eventDispatcher instanceof PsrEventDispatcherInterface
+        ) {
+            $this->eventDispatcher->dispatch($event);
+        } else {
+            $this->eventDispatcher->dispatch(get_class($event), $event);
+        }
     }
 
     /**
@@ -68,7 +114,7 @@ class ReorderController
         return $entity;
     }
 
-    private function getRepository(Element $element): NestedTreeRepository
+    private function getRepository(AdminDoctrineElement $element): NestedTreeRepository
     {
         $repository = $element->getRepository();
         if (false === $repository instanceof NestedTreeRepository) {
@@ -82,20 +128,13 @@ class ReorderController
         return $repository;
     }
 
-    private function flush(Element $element): void
+    private function getRedirectResponse(AdminElement $element, Request $request): RedirectResponse
     {
-        $element->getObjectManager()->flush();
-    }
-
-    private function getRedirectResponse(DataIndexerElement $element, Request $request): RedirectResponse
-    {
-        if ($request->query->get('redirect_uri')) {
-            $uri = $request->query->get('redirect_uri');
+        $redirectUri = $request->query->get('redirect_uri');
+        if (null !== $redirectUri && '' !== $redirectUri) {
+            $uri = $redirectUri;
         } else {
-            $uri = $this->router->generate(
-                $element->getRoute(),
-                $element->getRouteParameters()
-            );
+            $uri = $this->router->generate($element->getRoute(), $element->getRouteParameters());
         }
 
         return new RedirectResponse($uri);
