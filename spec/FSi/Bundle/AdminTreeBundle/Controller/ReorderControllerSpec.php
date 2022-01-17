@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 namespace spec\FSi\Bundle\AdminTreeBundle\Controller;
 
-use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ObjectManager;
 use FSi\Bundle\AdminBundle\Doctrine\Admin\CRUDElement;
 use FSi\Bundle\AdminTreeBundle\Controller\ReorderController;
 use FSi\Bundle\AdminTreeBundle\Event\MovedDownTreeEvent;
